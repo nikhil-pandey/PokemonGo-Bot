@@ -7,20 +7,18 @@ import requests
 import base64
 from pokemongo_bot import logger
 from pokemongo_bot.cell_workers.utils import distance, i2f, format_dist
-from pokemongo_bot.human_behaviour import sleep
 from pokemongo_bot.step_walker import StepWalker
 from pokemongo_bot.worker_result import WorkerResult
 from pokemon_catch_worker import PokemonCatchWorker
+from pokemongo_bot.cell_workers.base_task import BaseTask
 
 
-class MoveToMapPokemon(object):
+class MoveToMapPokemon(BaseTask):
 
-    def __init__(self, bot, config):
-        self.bot = bot
-        self.config = config
+    def initialize(self):
         self.last_map_update = 0
         self.db = self.load_db()
-        self.pokemon_data = bot.pokemon_list
+        self.pokemon_data = self.bot.pokemon_list
         self.caught = []
         self.unit = self.bot.config.distance_unit
 
@@ -103,7 +101,7 @@ class MoveToMapPokemon(object):
                 score += 10000
             if self.config['mode'] == 'distance':
                 score -= pokemon['dist']
-            elif self.config['mode'] == 'priority':
+            elif self.config['mode'] == 'priority' or self.config['mode'] == 'snipe':
                 score += self.get_config_priority(pokemon['pokemon_id'])
             elif self.config['mode'] == 'hybrid':
                 score += self.get_config_priority(pokemon['pokemon_id'])
@@ -191,7 +189,7 @@ class MoveToMapPokemon(object):
         pokemon = pokemon_on_map[0]
         now = int(time.time())
 
-        if self.bot.config.walk <= 0 or self.config['snipe']:
+        if self.bot.config.walk <= 0 or self.config['mode'] == 'snipe':
             return self.snipe(pokemon)
 
         logger.log('Moving towards {}, {} left'.format(pokemon['name'], format_dist(pokemon['dist'], self.unit)))
