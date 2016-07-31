@@ -5,7 +5,6 @@ from pokemongo_bot.worker_result import WorkerResult
 from pokemongo_bot.cell_workers.base_task import BaseTask
 from utils import distance, format_dist, fort_details
 
-
 class MoveToFort(BaseTask):
     def should_run(self):
         return (self.bot.has_space_for_loot()) or self.bot.softban
